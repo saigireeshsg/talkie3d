@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A0F1C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Talkie 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{
+  --bg:#0A0F1C; --surface:#141C31; --sunk:#1C2642; --ink:#F2F5FC; --muted:#9AA6C4; --line:#28345A;
+  --accent:#7C95FF; --accent-ink:#0A1030; --xp:#FFC23D; --fix:#FF8D84; --ok:#6FE0A8; --end:#E5484D;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1{font-size:30px;font-weight:800;line-height:1.08}
+h2{font-size:22px;font-weight:800}
+h3{font-size:16px;font-weight:600}
+p{margin:0}
+.muted{color:var(--muted)}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.09em;font-weight:700;color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center}
+.grow{flex:1;min-width:0}
+.btn{background:var(--accent);color:var(--accent-ink);font-weight:700;padding:13px 18px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.ghost{background:var(--sunk);color:var(--ink)}
+.btn:disabled{opacity:.45}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%}
+
+.page{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;gap:18px;
+  padding:calc(14px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.stat{font-family:var(--f-mono);font-size:13px;text-align:right;line-height:1.6}
+.stat b{color:var(--xp)}
+.people{display:grid;gap:12px}
+.person{display:flex;gap:14px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px;position:relative;overflow:hidden}
+.person::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,var(--c1) 0%,transparent 55%);opacity:.22}
+.badge{position:relative;flex:none;width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:24px;color:#0A0F1C;background:linear-gradient(150deg,var(--c2),var(--c1))}
+.person .meta{position:relative;display:flex;flex-direction:column;gap:2px;min-width:0}
+.person small{color:var(--muted);font-size:13px;line-height:1.35}
+.chip{font-size:12px;background:rgba(255,255,255,.08);border-radius:999px;padding:2px 9px;color:var(--muted);align-self:flex-start;margin-top:4px}
+.warn{background:#2A2110;border:1px solid #4E3C14;color:#FFD98A;border-radius:14px;padding:12px 14px;font-size:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.memo{margin:0;padding:0;list-style:none;display:grid;gap:5px;font-size:14px}
+.memo li::before{content:"· ";color:var(--accent);font-weight:700}
+.modes{display:grid;gap:8px}
+.mode{display:flex;gap:12px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.mode .ic{flex:none;width:42px;height:42px;border-radius:12px;background:var(--sunk);display:grid;place-items:center;font-family:var(--f-mono);font-size:11px}
+.mode small{display:block;color:var(--muted);font-size:13px}
+.mode.free{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.mode.free .ic{background:rgba(255,255,255,.25)}
+.mode.free small{color:inherit;opacity:.75}
+.facts{margin:0;padding:0;list-style:none;display:grid;gap:6px;font-size:14px}
+.facts li{display:flex;gap:10px}
+.facts li span:first-child{flex:none;width:86px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+label.f{display:grid;gap:6px;font-size:13px;color:var(--muted)}
+
+/* call */
+.call{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);z-index:5}
+.stage{position:relative;flex:1;min-height:0;background:radial-gradient(120% 80% at 50% 30%,var(--s1),var(--s2) 70%)}
+#avatar{position:absolute;inset:0}
+.bar{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;gap:10px;z-index:2;
+  padding:calc(10px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) 14px max(14px,env(safe-area-inset-left,0px));background:linear-gradient(rgba(5,8,16,.7),transparent)}
+.bar b{font-family:var(--f-display);font-size:19px}
+.bar small{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.pill{background:rgba(255,255,255,.14);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.pill.on{background:#FFE7A3;color:#3A2A00}
+.center{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);text-align:center;font-family:var(--f-display);font-size:20px;text-shadow:0 2px 14px #000;z-index:2;width:80%}
+.center small{display:block;font-family:var(--f-body);font-size:14px;color:var(--muted);margin-top:6px}
+.subs{position:absolute;left:0;right:0;bottom:0;z-index:2;text-align:center;font-size:18px;line-height:1.45;text-wrap:balance;
+  padding:30px max(18px,env(safe-area-inset-right,0px)) 14px max(18px,env(safe-area-inset-left,0px));background:linear-gradient(transparent,rgba(5,8,16,.9) 45%)}
+.subs .who{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.subs .you{color:#C9D4FF}
+.subs .interim{color:#8a95b3}
+.dock{padding:10px max(14px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+.hints{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.hint{flex:none;font-size:13px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:6px 12px;max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.controls{display:flex;align-items:center;justify-content:center;gap:22px}
+.round{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--sunk);font-size:18px;font-weight:700;flex:none}
+.round.end{background:var(--end);color:#fff}
+.mic{width:76px;height:76px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;position:relative;flex:none}
+.mic svg{width:30px;height:30px}
+.mic.listening{background:#fff;color:#0A0F1C}
+.mic.listening::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:3px solid #fff;animation:ring 1.2s ease-out infinite}
+.mic.busy{opacity:.55}
+@keyframes ring{from{transform:scale(.9);opacity:1}to{transform:scale(1.25);opacity:0}}
+.typebar{display:flex;gap:8px}
+.typebar textarea{resize:none;border-radius:22px;padding:10px 16px;max-height:100px}
+.typebar .round{width:44px;height:44px;background:var(--accent);color:var(--accent-ink)}
+.livebar{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);min-height:20px}
+.livebar i{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.livebar.listening i{background:var(--ok)}
+.livebar.hearing i{background:var(--ok);animation:blip .6s ease-in-out infinite alternate}
+.livebar.hearing{color:var(--ink)}
+.livebar.thinking i{background:var(--xp)}
+.livebar.speaking i{background:var(--accent)}
+.livebar.muted i,.livebar.paused i{background:var(--end)}
+@keyframes blip{from{transform:scale(.8)}to{transform:scale(1.35)}}
+.mic.muted{background:var(--sunk);color:var(--end)}
+.mic.muted::before{content:"";position:absolute;width:44px;height:3px;background:var(--end);transform:rotate(-45deg);border-radius:2px}
+.note{font-size:12px;color:var(--muted);text-align:center;min-height:1em}
+.drawer{position:absolute;inset:0;z-index:3;background:rgba(10,15,28,.96);overflow-y:auto;display:flex;flex-direction:column;gap:10px;
+  padding:calc(64px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px))}
+.fx{background:var(--surface);border-radius:12px;padding:10px 12px;font-size:14px}
+.fx s{color:var(--fix)}.fx b{color:var(--ok);font-weight:600}.fx em{display:block;font-style:normal;color:var(--muted);font-size:12.5px;margin-top:2px}
+.fx.nat{border-left:3px solid var(--xp)}
+.big{font-family:var(--f-display);font-weight:800;font-size:44px;color:var(--xp);line-height:1}
+.bye{font-family:var(--f-display);font-size:19px;line-height:1.35}
+.word{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186/build/three.module.js/+esm",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186/examples/jsm/",
+  "talkinghead": "https://cdn.jsdelivr.net/gh/met4citizen/TalkingHead@1.8/modules/talkinghead.mjs"
+} }
+</script>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="module">
+import { TalkingHead } from "talkinghead";
+
+/* =====================================================================
+   CHARACTERS — each one is a bible (personality) + a rigged 3D avatar.
+   Swap avatar.url for your own GLB (Avaturn T2, MPFB, Character Creator
+   with ARKit + Oculus viseme blendshapes) to add new faces.
+   Sample avatars are from the TalkingHead repo: non-commercial use only.
+   ===================================================================== */
+const AV = "https://cdn.jsdelivr.net/gh/met4citizen/TalkingHead@1.8/avatars/";
+const CHARS = {
+  ines:{
+    name:"Inés", age:29, city:"Brooklyn, New York", from:"Barcelona", job:"Pastry chef at a tiny bakery", c1:"#E8875F", c2:"#FFD1A8", s1:"#5A3A2A", s2:"#1A1110",
+    tagline:"Quit architecture for croissants. No regrets. Mostly.", voice:["en-US"], gender:"f", pitch:1.05, rate:1.02,
+    avatar:{url:AV+"brunette.glb",body:"F",avatarMood:"happy",baseline:{headRotateX:-0.05,eyeBlinkLeft:0.15,eyeBlinkRight:0.15}},
+    bible:`Inés Calderón, 29. Grew up in Barcelona above her grandmother's café. Studied architecture, worked two miserable years at a firm in Madrid, quit and moved to New York at 26 to become a pastry chef. Works 5am shifts at "Miga", a tiny bakery in Greenpoint, Brooklyn; dreams of opening her own place with a Catalan twist. Lives with a moody cat called Gaudí and a dying fiddle-leaf fig she refuses to give up on. Does the crossword on the subway. Younger brother Pau is a DJ in Berlin who never calls. Hot takes: pineapple on pizza is fine, people who say "I'm not a dessert person" are lying, New York bagels are overrated. Warm, quick, sarcastic in a friendly way, very honest, laughs easily, dramatic about food. Says "okay but listen", "honestly?", "no, stop", sometimes a Spanish word like "vale" or "madre mía" then explains it. Tells stories from the bakery: rude customers, burnt batches, her boss Tony who sings Sinatra badly.`,
+    greet:"Hey! Sorry, I still have flour everywhere, I just finished my shift. Okay but listen, how's your day going?"
+  },
+  maeve:{
+    name:"Maeve", age:33, city:"London, UK", from:"Dublin, Ireland", job:"Tech recruiter, ex-champion Irish dancer", c1:"#C05B3F", c2:"#F2B49B", s1:"#2E3A4A", s2:"#0E131C",
+    tagline:"Has read 10,000 CVs. Can tell when you're bluffing.", voice:["en-IE","en-GB"], gender:"f", pitch:1.0, rate:1.0,
+    avatar:{url:AV+"avaturn.glb",body:"F",avatarMood:"happy",
+      retarget:{Hips:{y:0.03},Spine:{y:0.02},Spine1:{y:0.02,z:0.01},Spine2:{y:0.02,z:0.01},Neck:{z:0.02,y:0.01},Head:{z:0.02},LeftShoulder:{rx:-0.5},RightShoulder:{rx:-0.5},scaleToHipsLevel:1.0},
+      baseline:{headRotateX:-0.05,eyeBlinkLeft:0.15,eyeBlinkRight:0.15}},
+    bible:`Maeve O'Sullivan, 33. Grew up in Dublin, the eldest of five; competed in Irish dancing until 19 and won a world championship medal she pretends not to care about. Studied psychology at Trinity, moved to London at 24, now a senior tech recruiter who has screened over ten thousand candidates and coaches people for interviews on the side. Lives in a tiny flat in Hackney with her partner Tom, a nervous sound engineer, and a sourdough starter called Bridget. Runs along the canal at 6am, loves trashy reality TV, hates the word "synergy". Hot takes: most CVs are too long, "tell me about yourself" is the most important question, Dublin pubs beat London pubs. Personality: blunt, very funny, fast, encouraging under the sarcasm, notices when people are vague and pushes for specifics. Says "grand", "ah stop", "go on", "fair play", "right so", "what's the craic".`,
+    greet:"Right so, you made it! Grand. I've just escaped a meeting about synergy, God help me. What's the craic with you?"
+  },
+  leo:{
+    name:"Leo", age:38, city:"Dubai, UAE", from:"Melbourne, Australia", job:"Airline pilot, father of twins", c1:"#3C8FD8", c2:"#A8D8FF", s1:"#26445E", s2:"#0B1622",
+    tagline:"Flies 400 people to Sydney. Still loses at Uno to his kids.", voice:["en-AU","en-GB"], gender:"m", pitch:.92, rate:.98,
+    avatar:{url:AV+"avatarsdk.glb",body:"M",avatarMood:"neutral",
+      retarget:{Neck:{z:-0.01,rx:-0.15},Neck1:{z:-0.01,rx:-0.15},Neck2:{z:-0.01,rx:-0.15},LeftShoulder:{rz:-0.3},RightShoulder:{rz:0.3},scaleToEyesLevel:1.0,origin:{y:-0.1}},
+      baseline:{headRotateX:-0.04,eyeBlinkLeft:0.05,eyeBlinkRight:0.05}},
+    bible:`Leo Hartley, 38. Grew up near the beach in Melbourne, Australia; surfed before school, worked at a fish-and-chip shop, learned to fly at 19 with money saved from that job. Now a first officer flying wide-body jets for an airline based in Dubai; flies long-haul to Sydney, London and Singapore. Married to Priya, a nurse; they have six-year-old twins, Sam and Ruby, who beat him at Uno every time. Barbecues on the balcony even in 45-degree heat. Misses the ocean and Vegemite; bad at learning Arabic but keeps trying. Calm in a crisis, laid-back, dad jokes, tells aviation stories (turbulence, a passenger who proposed mid-flight, landing in fog), curious about where people are from. Hot takes: window seat is the only seat, airport food is underrated, everyone should learn to swim. Says "mate", "no worries", "reckon", "heaps", "fair dinkum" (rarely), "how good is that".`,
+    greet:"G'day, mate! Just landed from Singapore, so forgive the jet lag. How good is it to chat. How are you going?"
+  },
+  mika:{
+    name:"Mika", age:24, city:"Vancouver, Canada", from:"Osaka, Japan", job:"Indie game artist and summer kayak guide", c1:"#B072E0", c2:"#F2C6FF", s1:"#3A2F55", s2:"#120E1E",
+    tagline:"Drawing a game about a lonely lighthouse. Year three.", voice:["en-US","en-CA"], gender:"f", pitch:1.15, rate:1.0,
+    avatar:{url:AV+"vroid.glb",body:"F",avatarMood:"neutral",baseline:{headRotateX:-0.1,eyeBlinkLeft:0.05,eyeBlinkRight:0.05}},
+    bible:`Mika Sato, 24. Grew up in Osaka, Japan, above her parents' okonomiyaki restaurant. Moved to Vancouver at 20 to study animation, stayed. Now a freelance game artist working on her own indie game, "Keeper", about a lonely lighthouse keeper — she's been making it for three years. Works as a kayak guide in summer to pay rent. Shares a house with two roommates and a rescue rabbit, Mochi. Draws in cafés, plays cozy games, collects capsule toys, secretly sings karaoke very loudly. A bit shy at first, then very chatty and excited; gets nerdy about games, anime, art, and the ocean; asks lots of curious questions; self-deprecating humour. Misses her mum's cooking and Osaka street food. Hot takes: Osaka food beats Tokyo food, rainy days are the best days, every game is better with a cat or a rabbit in it. Says "oh, that's so cool!", "wait, really?", "hmm, how do I say...", sometimes a Japanese word like "natsukashii" or "yatta!" and explains it.`,
+    greet:"Oh, hi! Wait, is my camera okay? Mochi just knocked over my coffee. Um, how are you today?"
+  }
+};
+const SCENES=[
+  {id:"interview",ic:"JOB",title:"Mock job interview",sub:"They interview you, in their own style",role:"interviewing the learner for a job the learner wants (ask what role first if you don't know)"},
+  {id:"cafe",ic:"CAF",title:"Meet at a café",sub:"Order, chat, split the bill",role:"meeting the learner at a café near where you live; you order together and chat"},
+  {id:"debate",ic:"VS",title:"Friendly debate",sub:"They pick a hot take and argue it",role:"starting a friendly debate on one of your hot takes; push back on their points but stay kind"},
+  {id:"advice",ic:"HLP",title:"Ask them for advice",sub:"Bring a real problem",role:"listening to a problem the learner brings and giving advice from your own life"},
+  {id:"travel",ic:"AIR",title:"Plan a trip to their city",sub:"They play local guide",role:"helping the learner plan a 3-day trip to your city with your personal recommendations"}
+];
+/* emotion → TalkingHead mood + extra facial blendshapes */
+const EMO={
+  neutral:{mood:"neutral",face:{}},
+  happy:{mood:"happy",face:{mouthSmileLeft:.35,mouthSmileRight:.35}},
+  laugh:{mood:"happy",face:{mouthSmileLeft:.6,mouthSmileRight:.6,eyeSquintLeft:.45,eyeSquintRight:.45,cheekSquintLeft:.4,cheekSquintRight:.4}},
+  curious:{mood:"neutral",face:{browOuterUpLeft:.45,browOuterUpRight:.45,eyeWideLeft:.2,eyeWideRight:.2}},
+  surprised:{mood:"neutral",face:{browInnerUp:.6,browOuterUpLeft:.6,browOuterUpRight:.6,eyeWideLeft:.5,eyeWideRight:.5}},
+  thinking:{mood:"neutral",face:{browDownLeft:.3,mouthPressLeft:.3,eyeLookUpLeft:.3,eyeLookUpRight:.3}},
+  empathy:{mood:"sad",face:{browInnerUp:.5,mouthSmileLeft:.15,mouthSmileRight:.15}},
+  tease:{mood:"happy",face:{browOuterUpRight:.55,mouthSmileRight:.5,eyeSquintLeft:.25}}
+};
+const FACE_KEYS=[...new Set(Object.values(EMO).flatMap(e=>Object.keys(e.face)))];
+const GESTURES=["handup","index","ok","thumbup","thumbdown","side","shrug","namaste"];
+
+/* ========================= STATE ========================= */
+const KEY="talkie3d";
+let S=load()||{apiKey:"",model:"claude-haiku-5-5",level:"B1",lang:"Hindi",accent:"en-US",xp:0,days:[],mem:{},bargeIn:true,voiceURI:{}};
+S.mem=S.mem||{};S.voiceURI=S.voiceURI||{};if(S.bargeIn===undefined)S.bargeIn=true;
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const memOf=id=>S.mem[id]||(S.mem[id]={facts:[],calls:0,follow:"",story:""});
+const today=()=>new Date().toISOString().slice(0,10);
+function streak(){let n=0,d=new Date();const set=new Set(S.days);if(!set.has(today()))d.setDate(d.getDate()-1);while(set.has(d.toISOString().slice(0,10))){n++;d.setDate(d.getDate()-1)}return n}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=s=>String(s).toLowerCase().replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+const app=$("#app");
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const hasTTS="speechSynthesis" in window;
+
+/* ========================= LOBBY ========================= */
+function renderLobby(){
+  const s=streak();
+  app.innerHTML=`<div class="page">
+    <div class="top"><div><p class="eyebrow">Talkie 3D</p><h1>Who do you want to call?</h1></div>
+      <div class="stat"><div><b>▲ ${s}</b> day streak</div><div>${S.xp} XP</div></div></div>
+    ${!S.apiKey?`<div class="warn">Add your Claude API key in Settings so the characters can think. Until then they run a short scripted demo.</div>`:""}
+    ${!SR?`<div class="warn">This browser has no speech recognition. Use Safari on iPhone or Chrome on Android to talk. You can still type.</div>`:""}
+    <div class="people">${Object.entries(CHARS).map(([k,c])=>{const m=memOf(k);return `<button class="person" data-k="${k}" style="--c1:${c.c1};--c2:${c.c2}">
+      <span class="badge">${c.name[0]}</span><span class="meta"><b>${c.name}, ${c.age} · ${esc(c.city.split(",")[0])}</b><small>${esc(c.tagline)}</small>
+      <span class="chip">${m.calls?`${m.calls} call${m.calls>1?"s":""} · knows ${m.facts.length} thing${m.facts.length===1?"":"s"} about you`:"New"}</span></span></button>`}).join("")}</div>
+    <button class="btn ghost" id="settings">Settings</button>
+  </div>`;
+  app.querySelectorAll(".person").forEach(b=>b.onclick=()=>renderProfile(b.dataset.k));
+  $("#settings").onclick=renderSettings;
+}
+
+function renderSettings(){
+  const vs=hasTTS?speechSynthesis.getVoices().filter(v=>v.lang.startsWith("en")):[];
+  app.innerHTML=`<div class="page">
+    <button class="btn ghost" id="back" style="align-self:flex-start;padding:8px 14px;font-size:13px">← Back</button>
+    <h2>Settings</h2>
+    <label class="f">Claude API key (stays on this phone)<input id="key" type="password" autocomplete="off" placeholder="sk-ant-..." value="${esc(S.apiKey)}"></label>
+    <label class="f">Model<select id="model">
+      ${[["claude-haiku-5-5","Haiku · fastest replies"],["claude-sonnet-5-5","Sonnet · richer character"]].map(([v,l])=>`<option value="${v}" ${S.model===v?"selected":""}>${l}</option>`).join("")}</select></label>
+    <label class="f">My English level<select id="lvl">${["A1","A2","B1","B2","C1"].map(l=>`<option ${l===S.level?"selected":""}>${l}</option>`).join("")}</select></label>
+    <label class="f">First language<select id="lng">${["Hindi","Telugu","Tamil","Bengali","Marathi","Spanish","Portuguese","Arabic","Other"].map(l=>`<option ${l===S.lang?"selected":""}>${l}</option>`).join("")}</select></label>
+    <label class="f">How I speak (helps speech recognition)<select id="acc">${[["en-IN","Indian English"],["en-US","American English"],["en-GB","British English"]].map(([v,l])=>`<option value="${v}" ${S.accent===v?"selected":""}>${l}</option>`).join("")}</select></label>
+    <label class="f"><span><input id="bi" type="checkbox" style="width:auto;margin-right:8px" ${S.bargeIn?"checked":""}>Interrupt them by talking over them (works best with earphones)</span></label>
+    ${vs.length?`<div class="card"><h3>Voices</h3><p class="muted" style="font-size:13px">Pick a voice per character. Your phone's installed voices are listed; download "Enhanced" or "Premium" voices in your phone's settings for better quality.</p>
+      ${Object.entries(CHARS).map(([k,c])=>`<label class="f">${c.name}<select data-v="${k}"><option value="">Automatic</option>${vs.map(v=>`<option value="${esc(v.voiceURI)}" ${S.voiceURI[k]===v.voiceURI?"selected":""}>${esc(v.name)} (${v.lang})</option>`).join("")}</select></label>`).join("")}</div>`:""}
+    <p class="muted" style="font-size:13px">Your key is stored only in this browser and sent only to Anthropic. Use this app for yourself; don't share it with the key inside.</p>
+    <button class="btn" id="save">Save</button>
+  </div>`;
+  $("#back").onclick=renderLobby;
+  $("#save").onclick=()=>{S.apiKey=$("#key").value.trim();S.model=$("#model").value;S.level=$("#lvl").value;S.lang=$("#lng").value;S.accent=$("#acc").value;S.bargeIn=$("#bi").checked;
+    app.querySelectorAll("select[data-v]").forEach(s=>S.voiceURI[s.dataset.v]=s.value);save();renderLobby()};
+}
+
+function renderProfile(k){
+  const c=CHARS[k],m=memOf(k);
+  app.innerHTML=`<div class="page">
+    <button class="btn ghost" id="back" style="align-self:flex-start;padding:8px 14px;font-size:13px">← All people</button>
+    <div class="row"><span class="badge" style="--c1:${c.c1};--c2:${c.c2};width:72px;height:72px;font-size:32px">${c.name[0]}</span>
+      <div class="grow"><h2>${c.name}, ${c.age}</h2><p class="muted">${esc(c.job)}</p></div></div>
+    <ul class="facts"><li><span>Lives in</span><span>${esc(c.city)}</span></li><li><span>From</span><span>${esc(c.from)}</span></li><li><span>Vibe</span><span>${esc(c.tagline)}</span></li></ul>
+    ${m.calls?`<div class="card"><h3>What ${c.name} remembers about you</h3>${m.facts.length?`<ul class="memo">${m.facts.slice(-6).map(f=>`<li>${esc(f)}</li>`).join("")}</ul>`:`<p class="muted">Nothing personal yet.</p>`}${m.follow?`<p class="muted" style="font-size:13px">Wants to ask you: ${esc(m.follow)}</p>`:""}</div>`:""}
+    <div class="modes"><button class="mode free" data-m="free"><span class="ic">LIVE</span><span class="grow"><b>Free talk</b><small>Just chat. ${c.name} brings the topics.</small></span></button>
+      ${SCENES.map(s=>`<button class="mode" data-m="${s.id}"><span class="ic">${s.ic}</span><span class="grow"><b>${s.title}</b><small>${s.sub}</small></span></button>`).join("")}</div>
+  </div>`;
+  $("#back").onclick=renderLobby;
+  app.querySelectorAll(".mode").forEach(b=>b.onclick=async()=>{
+    const prob=micProblem();
+    if(prob){showMicWarn(prob,()=>startCall(k,b.dataset.m));return}
+    if(!S.micOK){b.disabled=true;const err=await askMic();b.disabled=false;if(err){showMicWarn(err,()=>startCall(k,b.dataset.m));return}}
+    startCall(k,b.dataset.m)});
+}
+
+/* ---------- Mic permission + diagnostics ---------- */
+function micProblem(){
+  if(!window.isSecureContext)return "The mic only works from an https:// link. You opened the file directly — host it (e.g. Netlify Drop) and open that link.";
+  if(!SR)return "This browser can't do speech recognition. Open the link in Chrome on Android or Safari on iPhone — not inside another app's built-in browser (WhatsApp, Instagram, Claude app).";
+  if(!navigator.mediaDevices?.getUserMedia)return "This browser doesn't allow microphone access here.";
+  return null;
+}
+async function askMic(){
+  try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});st.getTracks().forEach(t=>t.stop());S.micOK=true;save();return null}
+  catch(e){return e.name==="NotAllowedError"?"Microphone permission was denied. Allow the microphone for this site in your browser settings (Safari: aA › Website Settings; Chrome: lock icon › Permissions), then try again."
+    :e.name==="NotFoundError"?"No microphone found on this device.":e.name==="NotReadableError"?"Another app is using the microphone. Close it and try again.":"Couldn't open the microphone ("+e.name+")."}
+}
+function showMicWarn(msg,cont){
+  document.querySelector("#micwarn")?.remove();
+  const d=document.createElement("div");d.id="micwarn";d.className="warn";d.style.cssText="display:grid;gap:10px";
+  d.innerHTML=`<b>Mic isn't available</b><span>${esc(msg)}</span><div class="row"><button class="btn" id="mwRetry" style="padding:9px 14px;font-size:14px">Try again</button><button class="btn ghost" id="mwType" style="padding:9px 14px;font-size:14px">Call and type instead</button></div>`;
+  $(".page").prepend(d);d.scrollIntoView({behavior:"smooth"});
+  $("#mwRetry").onclick=async()=>{const p=micProblem();if(p){showMicWarn(p,cont);return}const err=await askMic();if(err){showMicWarn(err,cont);return}d.remove();cont()};
+  $("#mwType").onclick=()=>{S.forceType=true;d.remove();cont()};
+}
+
+/* ========================= CALL ========================= */
+let C=null, head=null;
+const MIC_SVG=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>`;
+
+async function startCall(k,mode){
+  const c=CHARS[k];
+  // Unlock audio + speech on this tap (iOS requires a user gesture)
+  if(hasTTS){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(" ");u.volume=0;speechSynthesis.speak(u)}catch(e){}}
+  C={k,c,mode,scene:SCENES.find(s=>s.id===mode)||null,turns:[],fixes:[],nats:[],start:0,state:"loading",hints:[],ctl:null,rec:null,ended:false,ttsQueue:[],speaking:false,drawer:false,typing:false,timer:0,muted:false,blocked:false,utt:"",carry:"",usedIdx:0,usedLen:0,uttMark:[0,0],turnSpoken:"",spokeSoFar:"",pendingText:"",echoUntil:0,restarts:[]};
+  const el=document.createElement("div");el.className="call";el.id="call";
+  el.innerHTML=`<div class="stage" style="--s1:${c.s1};--s2:${c.s2}"><div id="avatar"></div>
+      <div class="bar"><div><b>${c.name}</b><br><small id="timer">Calling…</small></div>
+        <button class="pill" id="fxb">Fixes 0</button></div>
+      <div class="center" id="center">Calling ${c.name}…<small id="load">Loading 3D character</small></div>
+      <div class="subs" id="subs" hidden></div>
+      <div class="drawer" id="drawer" hidden></div></div>
+    <div class="dock"><div class="hints" id="hints"></div>
+      <div class="typebar" id="typebar" hidden><textarea id="box" rows="1" placeholder="Type to ${c.name}…" aria-label="Type your reply"></textarea><button class="round" id="send" aria-label="Send">↑</button></div>
+      <div class="livebar" id="live"><i></i><span>Connecting</span></div>
+      <div class="controls"><button class="round" id="kb" aria-label="Type instead" style="font-size:13px">Aa</button><button class="mic" id="mic" aria-label="Mute microphone">${MIC_SVG}</button><button class="round end" id="hang" aria-label="End call">✕</button></div>
+      <p class="note" id="note">${S.apiKey?"":"Demo mode: add your Claude API key in Settings for real conversations."}</p></div>`;
+  document.body.appendChild(el);
+  $("#hang").onclick=endCall;
+  $("#mic").onclick=micButton;
+  $("#kb").onclick=()=>{C.typing=!C.typing;$("#typebar").hidden=!C.typing;if(C.typing)$("#box").focus()};
+  $("#fxb").onclick=()=>{C.drawer=!C.drawer;drawDrawer()};
+  $("#send").onclick=()=>{const t=$("#box").value.trim();if(!t)return;$("#box").value="";sendNow(t)};
+  $("#box").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("#send").click()}};
+  const typeOnly=S.forceType||micProblem();S.forceType=false;
+  if(!typeOnly)micOn(); else {C.typing=true;C.muted=true;$("#typebar").hidden=false;setLive("muted","Mic off · typing mode")}
+
+  try{
+    if(head){try{head.stop();head.renderer?.dispose()}catch(e){}}
+    head=new TalkingHead($("#avatar"),{ttsEndpoint:"",lipsyncModules:["en"],lipsyncLang:"en",cameraView:"upper",modelFPS:30,
+      avatarIdleEyeContact:.5,avatarSpeakingEyeContact:.8,lightAmbientIntensity:2,lightDirectIntensity:28,cameraRotateEnable:false});
+    try{head.audioCtx?.resume()}catch(e){}
+    await head.showAvatar({...c.avatar,lipsyncLang:"en"},ev=>{if(ev.lengthComputable){const p=$("#load");if(p)p.textContent=`Loading 3D character ${Math.min(100,Math.round(ev.loaded/ev.total*100))}%`}});
+  }catch(e){console.error(e);const p=$("#load");if(p)p.textContent="Couldn't load the 3D character. Check your connection and try again.";return}
+  if(!C||C.ended)return;
+  $("#center").innerHTML="Connecting…";setLive("thinking","Connecting");
+  C.timer=setInterval(()=>{if(!C||!C.start)return;const s=Math.floor((Date.now()-C.start)/1000);const t=$("#timer");if(t)t.textContent=`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`},1000);
+  greet();
+}
+
+/* ---------- 3D expression control ---------- */
+let faceTimer=0;
+function express(emotion,gesture){
+  if(!head)return;const e=EMO[emotion]||EMO.neutral;
+  try{head.setMood(e.mood)}catch(_){}
+  for(const k of FACE_KEYS){try{head.setFixedValue(k,e.face[k]??null,300)}catch(_){}}
+  clearTimeout(faceTimer);faceTimer=setTimeout(()=>{for(const k of FACE_KEYS){try{head.setFixedValue(k,null,800)}catch(_){}}},6000);
+  if(gesture&&GESTURES.includes(gesture)){try{head.playGesture(gesture,2.5,Math.random()<.5)}catch(_){}}
+}
+
+/* ---------- Voice out: phone TTS + 3D lip-sync ----------
+   Phone TTS gives no audio buffer, so we drive the avatar's visemes with
+   a silent buffer timed to the speech: per word when the voice reports
+   word boundaries, otherwise per sentence from an estimated speaking rate. */
+let boundaryWorks=false;
+function silent(ms){const ctx=head.audioCtx;return ctx.createBuffer(1,Math.max(1,Math.round(ctx.sampleRate*ms/1000)),ctx.sampleRate)}
+function lipWords(words,msPerChar,pad=100){
+  const wt=[],wd=[];let t=0;
+  for(const w of words){const d=Math.max(110,w.length*msPerChar);wt.push(t);wd.push(d);t+=d+40}
+  try{head.speakAudio({audio:silent(Math.max(60,t-40+pad)),words,wtimes:wt,wdurations:wd},{isRaw:true})}catch(e){}
+}
+function pickVoice(){
+  if(!hasTTS)return null;const vs=speechSynthesis.getVoices();const want=S.voiceURI[C.k];
+  if(want){const v=vs.find(v=>v.voiceURI===want);if(v)return v}
+  for(const l of C.c.voice){const cand=vs.filter(v=>v.lang.replace("_","-").startsWith(l));if(cand.length){
+    const pref=cand.find(v=>/premium|enhanced|neural|natural/i.test(v.name))||cand.find(v=>C.c.gender==="f"?/female|karen|moira|samantha|catherine|serena|tessa|allison|ava|zoe|jenny|aria|natasha/i.test(v.name):/male|lee|daniel|gordon|arthur|alex|oliver|guy|ryan|william|tom|aaron/i.test(v.name));
+    return pref||cand[0]}}
+  return vs.find(v=>v.lang.startsWith("en"))||null}
+function queueSpeech(text){if(!text.trim())return;C.turnSpoken+=" "+text.trim();C.ttsQueue.push(text.trim());if(!C.speaking)speakNext()}
+function speakNext(){
+  if(!C||C.ended)return;
+  const text=C.ttsQueue.shift();
+  if(!text){C.speaking=false;C.onSpeechDone?.();return}
+  C.speaking=true;C.spokeSoFar+=" "+text;setSubs(C.c.name,text);if(C.live!=="hearing")setLive("speaking");
+  const words=text.split(/\s+/).filter(Boolean);
+  if(!hasTTS){lipWords(words,65);setTimeout(speakNext,words.length*330);return}
+  const u=new SpeechSynthesisUtterance(text);const v=pickVoice();if(v)u.voice=v;u.lang=v?.lang||C.c.voice[0];u.pitch=C.c.pitch;
+  u.rate=C.c.rate*(["A1","A2"].includes(S.level)?.85:1);
+  const starts=[];let p=0;text.replace(/\S+/g,(m,i)=>{starts.push([i,m])});
+  let gotBoundary=false,started=false;
+  u.onstart=()=>{started=true;if(!boundaryWorks)lipWords(words,Math.round(62/u.rate))};
+  u.onboundary=e=>{if(e.name&&e.name!=="word")return;gotBoundary=true;
+    if(boundaryWorks){const w=starts.find(([i,m])=>i<=e.charIndex&&e.charIndex<i+m.length)||starts.find(([i])=>i>=e.charIndex);if(w)lipWords([w[1]],45,0)}
+    if(!boundaryWorks){boundaryWorks=true}};
+  u.onend=u.onerror=()=>{clearTimeout(guard);try{head.stopSpeaking()}catch(_){}setTimeout(speakNext,60)};
+  const guard=setTimeout(()=>{if(!started){try{speechSynthesis.cancel()}catch(_){}lipWords(words,65);setTimeout(speakNext,words.length*330)}},2500);
+  speechSynthesis.speak(u);
+}
+function stopTalking(){if(!C)return;C.ttsQueue=[];C.speaking=false;C.onSpeechDone=null;try{speechSynthesis.cancel()}catch(e){}try{head.stopSpeaking()}catch(e){}}
+function setSubs(who,text,cls=""){const s=$("#subs");if(!s)return;s.hidden=false;s.innerHTML=`<span class="who">${esc(who)}</span><span class="${cls}">${esc(text)}</span>`}
+
+/* ---------- Voice in: always-on mic, like a real call ----------
+   The recognizer runs for the whole call. We decide when you've finished
+   (adaptive silence), filter out the character's own voice (echo) by
+   comparing against what it is saying, and treat new words spoken over
+   the character as an interruption. */
+const LIVE_TXT={listening:"Listening",hearing:"Hearing you",thinking:"Thinking",speaking:"Speaking · talk to interrupt",muted:"Muted",paused:"Mic paused · tap the mic to resume"};
+function setLive(st,msg){if(!C)return;C.live=st;const el=$("#live");if(!el)return;el.className="livebar "+st;
+  const label=st==="speaking"&&!S.bargeIn?"Speaking":LIVE_TXT[st]||"";el.innerHTML=`<i></i><span>${esc(msg||label)}</span>`;
+  const m=$("#mic");if(m){m.classList.toggle("muted",st==="muted"||st==="paused");m.setAttribute("aria-label",st==="muted"?"Unmute microphone":"Mute microphone")}}
+function idleLive(){if(!C)return;setLive(C.muted?(C.typing&&!SR?"muted":"muted"):(C.blocked||(!C.micLive&&!C.rec))?"paused":"listening")}
+const FILLER=/^(um+|uh+|erm*|hmm+|and|but|so|because|cause|like|the|a|an|to|of|with|my|i|or|if|that|is|was|in|for|which|when|actually|basically)$/i;
+function endDelay(t){const w=t.trim().split(/\s+/);const last=(w.at(-1)||"").replace(/[^a-z']/gi,"");
+  if(FILLER.test(last))return 1800;      // mid-thought: wait longer
+  if(/[?.!]$/.test(t.trim()))return 700;  // recognizer added end punctuation
+  if(w.length<=2)return 1300;             // "yeah", "so..." may continue
+  return 1000}
+const wordsOf=s=>norm(s).split(" ").filter(Boolean);
+function novelWords(t){const sp=new Set(wordsOf(C.turnSpoken));return wordsOf(t).filter(x=>!sp.has(x))}
+function isEchoOf(t,ref,th){const sp=new Set(wordsOf(ref));const w=wordsOf(t);return w.length>0&&w.filter(x=>sp.has(x)).length/w.length>=th}
+function isEcho(t){const w=wordsOf(t);if(!w.length)return true;if(!C.turnSpoken)return false;return (w.length-novelWords(t).length)/w.length>=.6}
+function micButton(){
+  if(!C)return;
+  if(C.blocked||C.live==="paused"){C.blocked=false;C.restarts=[];micOn();return}
+  C.muted=!C.muted;
+  if(C.muted){const r=C.rec;C.rec=null;try{r?.abort()}catch(e){}clearTimeout(C.endT);C.utt="";setLive("muted")}
+  else{micOn();if(!C.speaking&&C.state!=="thinking")idleLive()}
+}
+function micOn(){
+  if(!SR||!C||C.ended||C.muted||C.rec)return;
+  const now=Date.now();C.restarts=C.restarts.filter(t=>now-t<10000);C.restarts.push(now);
+  if(C.restarts.length>6){C.blocked=true;setLive("paused");return}   // recognizer keeps dying: wait for a tap
+  C.micLive=false;const r=new SR();C.rec=r;r.lang=S.accent;r.continuous=true;r.interimResults=true;r.maxAlternatives=1;C.usedIdx=0;C.usedLen=0;C.uttMark=[0,0];
+  r.onresult=e=>{if(C&&C.rec===r)onHear(e)};
+  r.onstart=()=>{if(!C||C.rec!==r)return;clearTimeout(C.startT);C.micLive=true;C.restartsOk=(C.restartsOk||0)+1;if(C.state!=="loading"&&!C.speaking&&C.state!=="thinking"&&C.live!=="hearing")idleLive()};
+  r.onerror=e=>{if(!C)return;const why={"not-allowed":"Microphone blocked for this site. Allow it in browser settings, then tap the mic.","service-not-allowed":"Speech recognition is turned off on this phone (iPhone: Settings › Siri, turn on Siri or Dictation). Then tap the mic.","audio-capture":"Another app is using the microphone. Close it, then tap the mic.","network":"Speech recognition needs internet. Check your connection, then tap the mic.","language-not-supported":"Your accent setting isn't supported here. Switching to American English."}[e.error];
+    if(e.error==="language-not-supported"){S.accent="en-US";save()}
+    if(why&&e.error!=="language-not-supported"){C.blocked=true;setLive("paused","Mic paused");$("#note").textContent=why}};
+  r.onend=()=>{if(!C||C.rec!==r)return;C.rec=null;
+    if(C.utt.trim()){clearTimeout(C.endT);commitUtt()}           // session ended mid-sentence: take what we have
+    if(!C.ended&&!C.muted&&!C.blocked)setTimeout(micOn,200)};
+  clearTimeout(C.startT);
+  C.startT=setTimeout(()=>{if(C&&C.rec===r&&!C.micLive){C.rec=null;try{r.abort()}catch(e){}C.blocked=true;setLive("paused","Tap the mic to start listening")}},3500);  // no onstart: browser wants a tap
+  try{r.start()}catch(e){clearTimeout(C.startT);C.rec=null;C.blocked=true;setLive("paused","Tap the mic to start listening")}
+}
+function onHear(e){
+  // Text since the last consumed point. A result can keep growing while it's interim,
+  // so we remember both the result index and how many characters of it we've used.
+  let txt="",allFinal=true;const n=e.results.length;
+  for(let i=C.usedIdx;i<n;i++){const t=e.results[i][0].transcript;txt+=(i===C.usedIdx?t.slice(C.usedLen):t)+" ";if(!e.results[i].isFinal)allFinal=false}
+  txt=txt.replace(/\s+/g," ").trim();
+  const last=e.results[n-1];const mark=last.isFinal?[n,0]:[n-1,last[0].transcript.length];
+  const consume=()=>{C.usedIdx=mark[0];C.usedLen=mark[1]};
+  if(!txt)return;
+  if(C.state==="loading"||!C.start){consume();return}     // ignore noise before they pick up
+  const charBusy=C.speaking||C.ttsQueue.length>0;
+  if(charBusy||Date.now()<C.echoUntil){
+    if(isEcho(txt)){if(allFinal)consume();return}                       // that's their own voice from the speaker
+    if(charBusy){
+      if(!S.bargeIn||novelWords(txt).length<2){if(allFinal)consume();return}
+      interrupt();
+    }
+  } else if(C.lastLine&&wordsOf(txt).length>=4&&isEchoOf(txt,C.lastLine,.85)){consume();return   // late echo of their last line
+  } else if(C.state==="thinking"&&C.pendingText){
+    // You kept talking before they answered: cancel the reply and treat it as one longer turn
+    C.ctl?.abort();if(C.turns.at(-1)?.who==="u")C.turns.pop();C.carry=C.pendingText;C.pendingText="";C.state="idle";
+  }
+  C.utt=(C.carry?C.carry+" ":"")+txt;C.uttMark=mark;
+  setSubs("You",C.utt,allFinal?"you":"interim");setLive("hearing");backchannel();
+  clearTimeout(C.endT);C.endT=setTimeout(commitUtt,endDelay(C.utt));
+}
+function commitUtt(){
+  if(!C)return;const t=C.utt.trim();C.usedIdx=C.uttMark[0];C.usedLen=C.uttMark[1];C.utt="";C.carry="";clearTimeout(C.endT);
+  if(!t||C.state==="loading")return;
+  userSaid(t);
+}
+function sendNow(t){if(!C)return;clearTimeout(C.endT);if(C.utt){C.usedIdx=C.uttMark[0];C.usedLen=C.uttMark[1]}C.utt="";C.carry="";
+  if(C.speaking||C.ttsQueue.length||C.state==="thinking")interrupt();userSaid(t)}
+function interrupt(){
+  const said=C.spokeSoFar.trim();const streaming=C.state==="thinking";
+  stopTalking();
+  if(streaming){C.ctl?.abort();if(said)C.turns.push({who:"c",text:said+" [interrupted]"})}
+  else{const last=C.turns.at(-1);if(last&&last.who==="c"&&!/\[interrupted\]$/.test(last.text))last.text=(said||last.text)+" [interrupted]"}
+  C.turnSpoken="";C.state="idle";express("curious");
+}
+function backchannel(){
+  const now=Date.now();if(now-(C.lastNod||0)<2300)return;C.lastNod=now;
+  try{head.lookAtCamera(400);head.setFixedValue("eyeLookUpLeft",null,200);head.setFixedValue("eyeLookUpRight",null,200);
+    head.setFixedValue("headRotateX",.07,170);setTimeout(()=>{try{head.setFixedValue("headRotateX",null,380)}catch(e){}},260);
+    if(/\b(haha|lol|funny|joke)\b/i.test(C.utt)){head.setFixedValue("mouthSmileLeft",.45,300);head.setFixedValue("mouthSmileRight",.45,300)}}catch(e){}
+}
+
+/* ---------- Brain: Claude, streamed ---------- */
+function persona(){
+  const c=C.c,m=memOf(C.k);
+  return `You are ${c.name}. This is who you are — stay 100% in character; this is your real life:
+${c.bible}
+
+You're on a video call with someone practising English. Their CEFR level: ${S.level}. Their first language: ${S.lang}.
+${m.calls?`You've talked ${m.calls} time(s) before. What you know about them: ${m.facts.join("; ")||"not much yet"}.${m.follow?" You wanted to ask about: "+m.follow+".":""}${m.story?" Last time you told them: "+m.story+".":""}`:"This is your first call. Early on, naturally ask their name."}
+${C.scene?`On this call you are ${C.scene.role} — but you are still ${c.name}, with your own personality, history and opinions.`:"Free talk: no script. Bring topics from your own life (something that happened today, an opinion, a question) and follow what they're interested in."}
+
+How you talk:
+- You're a real person, not a teacher. React first (laugh, sympathise, be surprised, tease), add a bit of your own life or opinion, then usually ask ONE question.
+- 1-3 short spoken sentences, contractions, natural rhythm. Use your speech habits sometimes, not every line. No emojis, no stage directions, no lists.
+- Pitch vocabulary at ${S.level}.${["A1","A2"].includes(S.level)?" Very simple words, short sentences.":""}
+- Never say you're an AI, a tutor or a language model. Never correct their English out loud.
+- Their messages come from speech recognition: ignore missing punctuation, capitals and obvious mis-hearings.
+- If your previous line ends with [interrupted], they cut you off mid-sentence. React like a person would (drop your point or briefly come back to it later) and respond to what they said. Never write [interrupted] yourself.
+- If their message seems unfinished or unclear, keep it short and invite them to go on.
+
+OUTPUT FORMAT (strict, always):
+Line 1: EMOTION|GESTURE  — EMOTION is one of neutral, happy, laugh, curious, surprised, thinking, empathy, tease. GESTURE is one of none, handup, index, ok, thumbup, thumbdown, side, shrug, namaste.
+Then the words you say out loud.
+Then a line containing only ###
+Then one JSON object: {"fix": null or {"fixed":"their last sentence corrected","why":"max 14 words"}, "natural": null or "how a native speaker would say their last message", "hints": ["3 short things they could say next at ${S.level}"], "story": "any new detail about YOUR life you just mentioned, max 10 words, or empty"}
+Only set "fix" for real grammar or word-choice errors, not punctuation.`;
+}
+async function claudeStream(messages,onText,signal){
+  const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal,headers:{"content-type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify({model:S.model,max_tokens:500,stream:true,system:[{type:"text",text:persona(),cache_control:{type:"ephemeral"}}],messages})});
+  if(!res.ok){let msg="";try{msg=(await res.json()).error?.message||""}catch(e){}throw new Error(res.status===401?"Your API key was rejected. Check it in Settings.":res.status===429?"Rate limited. Wait a moment and try again.":msg||("Claude error "+res.status))}
+  const rd=res.body.getReader(),dec=new TextDecoder();let buf="",full="";
+  while(true){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});
+    let i;while((i=buf.indexOf("\n"))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+      if(!line.startsWith("data:"))continue;const d=line.slice(5).trim();if(!d)continue;
+      try{const j=JSON.parse(d);if(j.type==="content_block_delta"&&j.delta?.text){full+=j.delta.text;onText(full)}}catch(e){}}}
+  return full;
+}
+function apiMessages(extraUser){
+  const msgs=[];for(const t of C.turns){const role=t.who==="c"?"assistant":"user";const content=t.text;
+    if(msgs.length&&msgs.at(-1).role===role)msgs.at(-1).content+="\n"+content;else msgs.push({role,content})}
+  if(extraUser){if(msgs.length&&msgs.at(-1).role==="user")msgs.at(-1).content+="\n"+extraUser;else msgs.push({role:"user",content:extraUser})}
+  if(msgs.length&&msgs[0].role!=="user")msgs.unshift({role:"user",content:"(video call connected)"});
+  if(!msgs.length)msgs.push({role:"user",content:extraUser||"(call starts)"});
+  return msgs.slice(-20);
+}
+/* Run one character turn: stream, express on line 1, speak sentence by sentence, parse tail */
+async function characterTurn(messages){
+  C.state="thinking";C.turnSpoken="";C.spokeSoFar="";setLive("thinking");try{head.setMood("neutral");head.setFixedValue("eyeLookUpLeft",.25,300);head.setFixedValue("eyeLookUpRight",.25,300)}catch(e){}
+  C.ctl=new AbortController();C.bodyStart=0;
+  let metaDone=false,spokenUpTo=0,said="",tailStart=-1,body="";
+  const onText=full=>{
+    if(!metaDone){const nl=full.indexOf("\n");if(nl<0)return;const [emo,ges]=full.slice(0,nl).trim().toLowerCase().split("|");metaDone=true;C.bodyStart=nl+1;
+      try{head.setFixedValue("eyeLookUpLeft",null,200);head.setFixedValue("eyeLookUpRight",null,200)}catch(e){}express(emo?.trim(),ges?.trim())}
+    body=full.slice(C.bodyStart);tailStart=body.indexOf("###");
+    const speakable=tailStart>=0?body.slice(0,tailStart):body;
+    // flush complete sentences
+    const rest=speakable.slice(spokenUpTo);const m=rest.match(/^[\s\S]*?[.!?…](?=\s|$)/);
+    if(m&&(tailStart>=0||m[0].length>12||/[.!?]\s/.test(rest))){const sent=m[0];spokenUpTo+=sent.length;said+=sent;queueSpeech(sent);}
+    if(tailStart>=0&&spokenUpTo<speakable.length){const last=speakable.slice(spokenUpTo);spokenUpTo=speakable.length;said+=last;queueSpeech(last)}
+  };
+  const full=await claudeStream(messages,onText,C.ctl.signal);
+  onText(full+"\n");
+  if(!metaDone){said=full;queueSpeech(full)}
+  const body2=full.slice(C.bodyStart||0);const ti=body2.indexOf("###");
+  const speakFinal=ti>=0?body2.slice(0,ti):body2;const spoken=speakFinal.trim();
+  if(metaDone&&spokenUpTo<speakFinal.length){queueSpeech(speakFinal.slice(spokenUpTo));spokenUpTo=speakFinal.length}
+  let tail={};if(ti>=0){const js=body2.slice(ti+3);const a=js.indexOf("{"),b=js.lastIndexOf("}");if(a>=0&&b>a){try{tail=JSON.parse(js.slice(a,b+1))}catch(e){}}}
+  return {say:spoken,tail};
+}
+async function greet(){
+  const c=C.c,m=memOf(C.k);let r=null;
+  if(S.apiKey){try{
+    r=await characterTurn(apiMessages(`[The call just connected. Open the call in character.${m.calls?" Greet them like you know them, mention ONE small new thing from your life since last time, and if you had a follow-up, ask about it.":""}${C.scene?" Lead into what you're doing on this call.":""}]`));
+  }catch(e){if(e.name==="AbortError")return;$("#note").textContent=e.message}}
+  if(!C||C.ended)return;
+  C.start=Date.now();$("#center").hidden=true;
+  if(!r||!r.say){r={say:c.greet,tail:{hints:["Hi! I'm good, thanks. And you?","Not bad, a bit tired.","Hello! Nice to meet you."]}};express("happy","handup");queueSpeech(c.greet)}
+  afterTurn(r);
+}
+function afterTurn(r){
+  C.turns.push({who:"c",text:r.say});C.lastLine=r.say;
+  if(r.tail.story)memOf(C.k).story=String(r.tail.story);
+  C.hints=Array.isArray(r.tail.hints)?r.tail.hints.slice(0,3).map(String):[];drawHints();
+  C.state="speaking";C.pendingText="";setLive("speaking");
+  C.onSpeechDone=()=>{if(!C||C.ended)return;C.state="idle";C.echoUntil=Date.now()+1200;setTimeout(()=>{if(C&&!C.speaking&&!C.ttsQueue.length)C.turnSpoken=""},1300);if(C.live!=="hearing")idleLive()};
+  if(!C.speaking&&!C.ttsQueue.length)C.onSpeechDone();
+}
+async function userSaid(text){
+  if(!C||C.ended)return;stopTalking();
+  const turn={who:"u",text};C.turns.push(turn);C.pendingText=text;setSubs("You",text,"you");C.hints=[];drawHints();
+  let r=null;
+  try{r=S.apiKey?await characterTurn(apiMessages()):demo(text)}
+  catch(e){if(e.name==="AbortError")return;$("#note").textContent=e.message;C.turns.pop();C.pendingText="";C.state="idle";idleLive();express("empathy");return}
+  if(!C||C.ended)return;
+  const t=r.tail||{};
+  if(t.fix&&t.fix.fixed&&norm(t.fix.fixed)!==norm(text)){turn.fix=t.fix;C.fixes.push({said:text,...t.fix})}
+  if(t.natural&&norm(t.natural)!==norm(text))C.nats.push({said:text,better:String(t.natural)});
+  updateFx();afterTurn(r);
+}
+let demoN=0;
+function demo(text){
+  const lines=["No way, really? Tell me more about that.","Ha! That's so interesting. What do you do on weekends?","Oh, that sounds like a lot. Are you doing okay?","Okay, I like this. Let's talk again soon!"];
+  const say=lines[Math.min(demoN++,lines.length-1)];const emo=["surprised","laugh","empathy","happy"][Math.min(demoN-1,3)];
+  express(emo,demoN===4?"thumbup":"none");queueSpeech(say);
+  return {say,tail:{fix:/\bi am agree\b/i.test(text)?{fixed:text.replace(/i am agree/i,"I agree"),why:"'Agree' is a verb, so no 'am'."}:null,hints:["Yes, totally!","Really? Tell me more.","Not really, to be honest."]}};
+}
+function drawHints(){const h=$("#hints");if(!h)return;h.innerHTML=C.hints.map(x=>`<button class="hint" title="${esc(x)}">${esc(x)}</button>`).join("");
+  h.querySelectorAll(".hint").forEach(b=>b.onclick=()=>sendNow(b.title))}
+function updateFx(){const b=$("#fxb");if(!b)return;const n=C.fixes.length+C.nats.length;b.textContent=`Fixes ${n}`;b.classList.toggle("on",n>0);if(C.drawer)drawDrawer()}
+function drawDrawer(){const d=$("#drawer");if(!d)return;d.hidden=!C.drawer;if(!C.drawer)return;
+  d.innerHTML=`<div class="row"><h3 class="grow">Your corrections</h3><button class="pill" id="cd">Close</button></div>
+  <p class="muted" style="font-size:13px">${C.c.name} won't interrupt you. Mistakes collect here quietly.</p>
+  ${C.fixes.map(f=>`<div class="fx"><s>${esc(f.said)}</s><br><b>${esc(f.fixed)}</b><em>${esc(f.why)}</em></div>`).join("")}
+  ${C.nats.map(f=>`<div class="fx nat"><em>You said: ${esc(f.said)}</em><b>${esc(f.better)}</b><em>More natural</em></div>`).join("")}
+  ${!C.fixes.length&&!C.nats.length?`<p class="muted">Nothing yet. Keep going.</p>`:""}`;
+  $("#cd").onclick=()=>{C.drawer=false;drawDrawer()}}
+
+/* ========================= END + MEMORY ========================= */
+async function endCall(){
+  if(!C||C.ended)return;C.ended=true;stopTalking();C.ctl?.abort();const rr=C.rec;C.rec=null;try{rr?.abort()}catch(e){}clearTimeout(C.endT);clearInterval(C.timer);
+  try{head?.stop()}catch(e){}
+  const X=C;C=null;$("#call")?.remove();
+  const mine=X.turns.filter(t=>t.who==="u");
+  if(!mine.length){renderProfile(X.k);return}
+  const secs=Math.round((Date.now()-(X.start||Date.now()))/1000),clean=mine.filter(t=>!t.fix).length;
+  const xp=10*mine.length+5*clean+Math.min(30,Math.floor(secs/20));
+  S.xp+=xp;if(!S.days.includes(today()))S.days.push(today());const m=memOf(X.k);m.calls++;save();
+  const c=X.c;
+  app.innerHTML=`<div class="page">
+    <div><p class="eyebrow">Call ended · ${Math.floor(secs/60)}m ${secs%60}s</p><h2>You talked with ${c.name}</h2></div>
+    <div class="card"><p class="bye" id="bye">${S.apiKey?`<span class="muted">${c.name} is writing you a note…</span>`:"Talk soon!"}</p></div>
+    <div class="card row" style="flex-direction:row"><div class="big">+${xp}</div><div class="grow"><b>XP</b><p class="muted" style="font-size:13px">${mine.length} things said · ${clean} with no mistakes</p></div><div style="text-align:right"><b>▲ ${streak()}</b><p class="muted" style="font-size:12px">day streak</p></div></div>
+    <div class="card"><h3>${c.name} will remember</h3><div id="memtxt" class="muted">${S.apiKey?"Saving…":"Memory needs your API key."}</div></div>
+    ${X.fixes.length||X.nats.length?`<div class="card"><h3>Your corrections</h3>${X.fixes.map(f=>`<div class="fx"><s>${esc(f.said)}</s><br><b>${esc(f.fixed)}</b><em>${esc(f.why)}</em></div>`).join("")}${X.nats.map(f=>`<div class="fx nat"><em>${esc(f.said)}</em><b>${esc(f.better)}</b></div>`).join("")}</div>`:""}
+    <div class="card" id="phr" hidden></div>
+    <div class="row" style="margin-top:auto"><button class="btn grow" id="again">Call ${c.name} again</button><button class="btn ghost" id="home">People</button></div>
+  </div>`;
+  $("#again").onclick=()=>startCall(X.k,X.mode);$("#home").onclick=renderLobby;
+  if(!S.apiKey)return;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":S.apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:S.model,max_tokens:600,messages:[{role:"user",content:`You are ${c.name}. ${c.bible.slice(0,400)}
+You just finished a video call with an English learner. Already known about them: ${m.facts.join("; ")||"nothing"}.
+Transcript:
+${X.turns.map(t=>(t.who==="c"?c.name:"Them")+": "+t.text).join("\n")}
+
+Reply with ONLY a JSON object:
+{"facts":["NEW facts the learner revealed about themselves (name, work, city, family, hobbies, plans, feelings), short third-person lines, max 6, empty if none"],
+ "follow":"one thing to ask them next time, max 12 words, or empty",
+ "note":"a short warm goodbye note in your voice, 1-2 sentences, mentioning something specific from the call",
+ "phrases":[{"p":"a useful English phrase for what they were trying to say","m":"short meaning"}]}  (exactly 3 phrases)`}]})});
+    if(!res.ok)throw new Error("Memory save failed ("+res.status+")");
+    const j=await res.json();const txt=j.content?.map(b=>b.text||"").join("")||"";const a=txt.indexOf("{"),b=txt.lastIndexOf("}");
+    const r=JSON.parse(txt.slice(a,b+1));
+    const nf=(r.facts||[]).map(String).filter(f=>f&&!m.facts.some(x=>norm(x)===norm(f)));
+    m.facts=[...m.facts,...nf].slice(-24);if(r.follow)m.follow=String(r.follow);save();
+    const by=$("#bye");if(by)by.innerHTML=`"${esc(r.note)}" <span class="muted">— ${c.name}</span>`;
+    const mt=$("#memtxt");if(mt)mt.outerHTML=nf.length?`<ul class="memo">${nf.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>${m.follow?`<p class="muted" style="font-size:13px">Next time: ${esc(m.follow)}</p>`:""}`:`<p class="muted">Nothing new this time.${m.follow?" Next time: "+esc(m.follow):""}</p>`;
+    if(Array.isArray(r.phrases)&&r.phrases.length){const p=$("#phr");p.hidden=false;p.innerHTML=`<h3>Phrases to try next call</h3>${r.phrases.map(w=>`<div class="word"><b>${esc(w.p)}</b><span class="muted">${esc(w.m)}</span></div>`).join("")}`}
+  }catch(e){const by=$("#bye");if(by)by.innerHTML=`<span class="muted">${esc(e.message)}</span>`;const mt=$("#memtxt");if(mt)mt.textContent="Couldn't save memory this time."}
+}
+
+document.addEventListener("visibilitychange",()=>{if(!head)return;if(document.visibilityState==="visible"){try{head.start()}catch(e){}}else{try{head.stop()}catch(e){}}});
+if(hasTTS){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>{}}
+renderLobby();
+</script>
+</body>
+</html>
